@@ -5,47 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rise — Your daily fitness & nutrition coach</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --ink:#11131A;
-    --ink-2:#1B1E29;
-    --card:#20232F;
-    --line:#2E323F;
-    --text:#EDEEF2;
-    --text-dim:#9A9EAD;
-    --lime:#C6FF3D;
-    --coral:#FF6B5E;
-    --sky:#5EC8FF;
+    --bg:#F7F4EE;
+    --bg-2:#FFFFFF;
+    --card:#FFFFFF;
+    --line:#E7E1D5;
+    --ink:#242019;
+    --ink-dim:#7C7669;
+    --deep:#1D3A34;
+    --deep-2:#274A42;
+    --gold:#A9824C;
+    --gold-soft:#F1E6D3;
+    --shadow:0 1px 2px rgba(36,32,25,0.04), 0 8px 24px rgba(36,32,25,0.06);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
-    background:var(--ink);
-    color:var(--text);
+    background:var(--bg);
+    color:var(--ink);
     font-family:'Inter',sans-serif;
     min-height:100vh;
   }
-  h1,h2,h3,.brand{font-family:'Space Grotesk',sans-serif;}
+  h1,h2,h3,.brand{font-family:'Fraunces',serif; font-weight:500;}
   .hidden{display:none !important;}
 
-  /* ---------- Top bar ---------- */
   .topbar{
     display:flex; justify-content:space-between; align-items:center;
-    padding:20px 24px;
+    padding:22px 28px;
     border-bottom:1px solid var(--line);
+    background:var(--bg-2);
   }
-  .brand{font-size:22px; font-weight:700; letter-spacing:-0.02em;}
-  .brand span{color:var(--lime);}
+  .brand{font-size:22px; letter-spacing:-0.01em; color:var(--deep);}
+  .brand span{color:var(--gold);}
   #signOutBtn{
-    background:none; border:1px solid var(--line); color:var(--text-dim);
-    padding:8px 14px; border-radius:20px; font-size:13px; cursor:pointer;
+    background:none; border:1px solid var(--line); color:var(--ink-dim);
+    padding:9px 16px; border-radius:24px; font-size:13px; cursor:pointer;
+    font-family:'Inter',sans-serif;
   }
-  #signOutBtn:hover{border-color:var(--text-dim); color:var(--text);}
+  #signOutBtn:hover{border-color:var(--deep); color:var(--deep);}
 
-  /* ---------- Auth screen ---------- */
   .auth-wrap{
-    min-height:calc(100vh - 73px);
+    min-height:calc(100vh - 77px);
     display:flex; align-items:center; justify-content:center;
     padding:24px;
   }
@@ -54,120 +56,181 @@
     background:var(--card);
     border:1px solid var(--line);
     border-radius:20px;
-    padding:36px 32px;
+    padding:40px 36px;
+    box-shadow:var(--shadow);
   }
-  .auth-card h1{font-size:28px; margin-bottom:6px; letter-spacing:-0.02em;}
-  .auth-card p.sub{color:var(--text-dim); font-size:14px; margin-bottom:28px;}
-  label{display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px; margin-top:16px;}
+  .auth-card h1{font-size:30px; margin-bottom:8px; color:var(--deep);}
+  .auth-card p.sub{color:var(--ink-dim); font-size:14px; margin-bottom:30px; line-height:1.5;}
+  label{display:block; font-size:12px; color:var(--ink-dim); margin-bottom:7px; margin-top:18px; text-transform:uppercase; letter-spacing:0.05em;}
   input, select{
-    width:100%; padding:12px 14px;
-    background:var(--ink-2); border:1px solid var(--line);
-    border-radius:10px; color:var(--text); font-size:15px;
+    width:100%; padding:13px 15px;
+    background:var(--bg); border:1px solid var(--line);
+    border-radius:10px; color:var(--ink); font-size:15px;
     font-family:'Inter',sans-serif;
   }
-  input:focus, select:focus{outline:none; border-color:var(--lime);}
+  input:focus, select:focus{outline:none; border-color:var(--deep);}
   .btn-primary{
-    width:100%; margin-top:24px;
-    background:var(--lime); color:#12130D;
-    border:none; padding:14px; border-radius:10px;
-    font-size:15px; font-weight:600; cursor:pointer;
-    font-family:'Space Grotesk',sans-serif;
+    width:100%; margin-top:26px;
+    background:var(--deep); color:#fff;
+    border:none; padding:15px; border-radius:10px;
+    font-size:15px; font-weight:500; cursor:pointer;
+    font-family:'Fraunces',serif;
+    letter-spacing:0.01em;
   }
-  .btn-primary:hover{filter:brightness(1.08);}
-  .btn-secondary{
-    width:100%; margin-top:10px;
-    background:none; color:var(--text-dim);
-    border:1px solid var(--line); padding:14px; border-radius:10px;
-    font-size:14px; cursor:pointer;
-  }
+  .btn-primary:hover{background:var(--deep-2);}
   .toggle-auth{
-    text-align:center; margin-top:18px; font-size:13px; color:var(--text-dim);
+    text-align:center; margin-top:20px; font-size:13px; color:var(--ink-dim);
   }
-  .toggle-auth a{color:var(--lime); cursor:pointer; text-decoration:none;}
-  .error-msg{color:var(--coral); font-size:13px; margin-top:12px; display:none;}
+  .toggle-auth a{color:var(--deep); cursor:pointer; text-decoration:none; font-weight:500;}
+  .error-msg{color:#B5533F; font-size:13px; margin-top:14px; display:none; line-height:1.4;}
 
-  /* ---------- Onboarding ---------- */
   .onboard-wrap{
-    max-width:520px; margin:0 auto; padding:48px 24px;
+    max-width:540px; margin:0 auto; padding:56px 24px;
   }
-  .onboard-wrap h1{font-size:30px; margin-bottom:8px;}
-  .onboard-wrap p.sub{color:var(--text-dim); margin-bottom:32px;}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .onboard-wrap h1{font-size:32px; margin-bottom:10px; color:var(--deep);}
+  .onboard-wrap p.sub{color:var(--ink-dim); margin-bottom:36px; line-height:1.5;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
   .pill-group{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
   .pill{
-    padding:10px 16px; border-radius:20px; border:1px solid var(--line);
-    background:var(--ink-2); color:var(--text-dim); font-size:13px; cursor:pointer;
+    padding:11px 18px; border-radius:24px; border:1px solid var(--line);
+    background:var(--bg-2); color:var(--ink-dim); font-size:13px; cursor:pointer;
   }
-  .pill.active{background:var(--lime); color:#12130D; border-color:var(--lime); font-weight:600;}
+  .pill.active{background:var(--deep); color:#fff; border-color:var(--deep); font-weight:500;}
 
-  /* ---------- Dashboard ---------- */
-  .dash{max-width:920px; margin:0 auto; padding:32px 24px 80px;}
-  .greeting{font-size:26px; margin-bottom:4px;}
-  .greeting .accent{color:var(--lime);}
-  .sub-line{color:var(--text-dim); font-size:14px; margin-bottom:28px;}
+  .youth-note{
+    font-size:13px; color:var(--ink-dim); background:var(--gold-soft);
+    border:1px solid #E3D2AE; border-radius:12px; padding:14px 16px; margin-top:22px; line-height:1.5;
+  }
+
+  .dash{max-width:940px; margin:0 auto; padding:40px 24px 90px;}
+  .greeting{font-size:30px; margin-bottom:6px; color:var(--deep);}
+  .greeting .accent{color:var(--gold);}
+  .sub-line{color:var(--ink-dim); font-size:14px; margin-bottom:32px;}
 
   .streak-bar{
-    display:flex; align-items:center; gap:16px;
-    background:linear-gradient(135deg, #1E2A19, #191C25);
-    border:1px solid var(--line); border-radius:16px;
-    padding:18px 22px; margin-bottom:28px;
+    display:flex; align-items:center; gap:18px;
+    background:linear-gradient(135deg, var(--deep), var(--deep-2));
+    border-radius:18px;
+    padding:22px 26px; margin-bottom:32px;
+    box-shadow:var(--shadow);
   }
-  .streak-num{font-size:32px; font-weight:700; color:var(--lime); font-family:'Space Grotesk',sans-serif;}
-  .streak-label{color:var(--text-dim); font-size:13px;}
+  .streak-num{font-size:36px; font-weight:500; color:#fff; font-family:'Fraunces',serif;}
+  .streak-label-wrap{color:rgba(255,255,255,0.75);}
+  .streak-label-wrap .title{color:#fff; font-weight:600; font-size:14px; font-family:'Inter',sans-serif;}
 
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
   @media(max-width:680px){.grid2{grid-template-columns:1fr;} .row2{grid-template-columns:1fr;}}
 
   .card{
-    background:var(--card); border:1px solid var(--line); border-radius:16px;
-    padding:22px;
+    background:var(--card); border:1px solid var(--line); border-radius:18px;
+    padding:26px;
+    box-shadow:var(--shadow);
   }
-  .card h3{font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px;}
-  .card p.desc{color:var(--text-dim); font-size:13px; margin-bottom:16px;}
-  .stat-row{display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:14px;}
+  .card h3{font-size:17px; margin-bottom:5px; color:var(--deep); font-weight:500;}
+  .card p.desc{color:var(--ink-dim); font-size:13px; margin-bottom:18px; line-height:1.4;}
+  .stat-row{display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line); font-size:14px;}
   .stat-row:last-child{border-bottom:none;}
-  .stat-row .val{color:var(--lime); font-weight:600;}
+  .stat-row .val{color:var(--deep); font-weight:600;}
 
   .task-item{
-    display:flex; align-items:center; gap:12px;
-    padding:12px 0; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:13px;
+    padding:13px 0; border-bottom:1px solid var(--line);
   }
   .task-item:last-child{border-bottom:none;}
   .check-btn{
     width:26px; height:26px; border-radius:50%; border:2px solid var(--line);
     background:none; cursor:pointer; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; color:var(--lime); font-size:14px;
+    display:flex; align-items:center; justify-content:center; color:var(--deep); font-size:14px;
   }
-  .check-btn.done{background:var(--lime); border-color:var(--lime); color:#12130D;}
-  .task-text{font-size:14px;}
-  .task-text .tag{display:block; color:var(--text-dim); font-size:11px; margin-top:2px;}
+  .check-btn.done{background:var(--deep); border-color:var(--deep); color:#fff;}
+  .task-text{font-size:14px; color:var(--ink);}
 
-  .section-title{font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin:32px 0 14px;}
+  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-dim); margin:36px 0 16px; font-weight:600;}
 
   .guide-list{display:flex; flex-direction:column; gap:10px;}
   .guide-item{
-    background:var(--card); border:1px solid var(--line); border-radius:12px;
-    padding:16px 18px; cursor:pointer;
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:18px 20px; cursor:pointer;
+    box-shadow:var(--shadow);
   }
-  .guide-item:hover{border-color:var(--sky);}
-  .guide-item h4{font-size:14px; margin-bottom:4px;}
-  .guide-item p{font-size:12px; color:var(--text-dim); line-height:1.5; display:none;}
-  .guide-item.open p{display:block; margin-top:8px;}
+  .guide-item:hover{border-color:var(--gold);}
+  .guide-item h4{font-size:14px; margin-bottom:4px; color:var(--ink); font-weight:600; font-family:'Inter',sans-serif;}
+  .guide-item p{font-size:13px; color:var(--ink-dim); line-height:1.6; display:none;}
+  .guide-item.open p{display:block; margin-top:10px;}
 
-  .youth-note{
-    font-size:12px; color:var(--text-dim); background:var(--ink-2);
-    border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-top:18px;
+  /* ---------- Theme variants ---------- */
+  body[data-theme="midnight"]{
+    --bg:#12141C; --bg-2:#1B1E29; --card:#1B1E29; --line:#2E323F;
+    --ink:#EDEEF2; --ink-dim:#9A9EAD; --deep:#C6FF3D; --deep-2:#B0E62F;
+    --gold:#5EC8FF; --gold-soft:#20303A;
+    --shadow:0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
   }
+  body[data-theme="midnight"] .btn-primary, body[data-theme="midnight"] .check-btn.done, body[data-theme="midnight"] .pill.active{color:#12130D;}
+
+  body[data-theme="sage"]{
+    --bg:#EAF0E9; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#D6E3D3;
+    --ink:#28362A; --ink-dim:#748572; --deep:#3E6B44; --deep-2:#4C7D51;
+    --gold:#9C8452; --gold-soft:#E4EAD9;
+  }
+
+  body[data-theme="blush"]{
+    --bg:#F7ECEA; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#EED9D5;
+    --ink:#3A2A28; --ink-dim:#8C7573; --deep:#A85C52; --deep-2:#BD6E63;
+    --gold:#C79A6B; --gold-soft:#F0DFCF;
+  }
+
+  body[data-theme="ocean"]{
+    --bg:#EAF1F5; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#D3E2EA;
+    --ink:#1F2E38; --ink-dim:#748C99; --deep:#1E5A78; --deep-2:#286E8F;
+    --gold:#5B9AAE; --gold-soft:#DCEBF0;
+  }
+
+  .theme-toggle-btn{
+    background:none; border:1px solid var(--line); color:var(--ink-dim);
+    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px;
+  }
+  .theme-panel{
+    position:fixed; inset:0; background:rgba(0,0,0,0.35);
+    display:flex; align-items:center; justify-content:center; z-index:50;
+  }
+  .theme-panel-inner{
+    background:var(--card); border-radius:18px; padding:26px; width:280px;
+    box-shadow:var(--shadow);
+  }
+  .theme-swatches{display:flex; flex-direction:column; gap:8px;}
+  .swatch{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    cursor:pointer; font-size:14px; color:var(--ink); font-family:'Inter',sans-serif;
+  }
+  .swatch span{width:18px; height:18px; border-radius:50%; border:1px solid rgba(0,0,0,0.15); display:inline-block;}
+  .swatch.selected{border-color:var(--deep); border-width:2px;}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="brand">rise<span>.</span></div>
-  <button id="signOutBtn" class="hidden">Sign out</button>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button id="themeBtn" class="theme-toggle-btn hidden" title="Customize background">🎨</button>
+    <button id="signOutBtn" class="hidden">Sign out</button>
+  </div>
 </div>
 
-<!-- ================= AUTH ================= -->
+<div id="themePanel" class="theme-panel hidden">
+  <div class="theme-panel-inner">
+    <h3 style="font-size:16px; margin-bottom:14px;">Background</h3>
+    <div class="theme-swatches">
+      <button class="swatch" data-theme="cream" style="background:#F7F4EE;"><span></span>Cream</button>
+      <button class="swatch" data-theme="midnight" style="background:#12141C;"><span style="background:#fff;"></span>Midnight</button>
+      <button class="swatch" data-theme="sage" style="background:#EAF0E9;"><span></span>Sage</button>
+      <button class="swatch" data-theme="blush" style="background:#F7ECEA;"><span></span>Blush</button>
+      <button class="swatch" data-theme="ocean" style="background:#EAF1F5;"><span></span>Ocean</button>
+    </div>
+    <button id="closeThemeBtn" style="margin-top:16px; width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:none; color:var(--ink-dim); cursor:pointer;">Close</button>
+  </div>
+</div>
+
 <div id="authScreen" class="auth-wrap">
   <div class="auth-card">
     <h1 id="authTitle">Welcome back</h1>
@@ -187,7 +250,6 @@
   </div>
 </div>
 
-<!-- ================= ONBOARDING ================= -->
 <div id="onboardScreen" class="onboard-wrap hidden">
   <h1>Let's set you up</h1>
   <p class="sub">A few quick details so your plan actually fits you.</p>
@@ -242,36 +304,35 @@
   <p class="error-msg" id="onboardError"></p>
 </div>
 
-<!-- ================= DASHBOARD ================= -->
 <div id="dashScreen" class="dash hidden">
   <h1 class="greeting">Today's <span class="accent">focus</span></h1>
   <p class="sub-line" id="dashDate"></p>
 
   <div class="streak-bar">
     <div class="streak-num" id="streakCount">0</div>
-    <div>
-      <div style="font-weight:600; font-size:14px;">day streak</div>
-      <div class="streak-label">Show up today to keep it going</div>
+    <div class="streak-label-wrap">
+      <div class="title">day streak</div>
+      <div>Show up today to keep it going</div>
     </div>
   </div>
 
   <div class="grid2">
     <div class="card">
-      <h3>🏋️ Today's workout</h3>
+      <h3>Today's workout</h3>
       <p class="desc" id="workoutDesc">Loading your plan...</p>
       <div id="workoutTasks"></div>
     </div>
 
     <div class="card">
-      <h3>🍎 Nutrition focus</h3>
+      <h3>Nutrition focus</h3>
       <p class="desc" id="nutritionDesc">Loading your plan...</p>
       <div id="nutritionTasks"></div>
     </div>
   </div>
 
-  <div class="grid2" style="margin-top:20px;">
+  <div class="grid2" style="margin-top:22px;">
     <div class="card">
-      <h3>📊 Your numbers</h3>
+      <h3>Your numbers</h3>
       <p class="desc">Calculated from your profile</p>
       <div class="stat-row"><span>Daily energy needs</span><span class="val" id="statTDEE">--</span></div>
       <div class="stat-row"><span>Goal</span><span class="val" id="statGoal">--</span></div>
@@ -279,7 +340,7 @@
     </div>
 
     <div class="card">
-      <h3>🧴 Hygiene tip of the day</h3>
+      <h3>Hygiene tip of the day</h3>
       <p class="desc" id="hygieneTip">Loading...</p>
     </div>
   </div>
