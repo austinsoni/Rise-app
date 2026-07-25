@@ -1,62 +1,91 @@
-// ============================================
-// STATE
-// ============================================
 let currentUser = null;
 let currentProfile = null;
 let isLoginMode = true;
-const obSelections = { sex:null, activity:null, goal:null, location:null };
+
+const obSelections = {
+  sex: null,
+  activity: null,
+  goal: null,
+  location: null
+};
+
+const $ = (id) => document.getElementById(id);
+
+function showError(id, message, success = false) {
+  const element = $(id);
+  element.textContent = message;
+  element.style.color = success ? "#2f7a50" : "var(--danger)";
+  element.style.display = "block";
+}
+
+function clearError(id) {
+  $(id).style.display = "none";
+}
 
 // ============================================
-// ELEMENTS
+// AUTHENTICATION
 // ============================================
-const authScreen = document.getElementById('authScreen');
-const onboardScreen = document.getElementById('onboardScreen');
-const dashScreen = document.getElementById('dashScreen');
-const signOutBtn = document.getElementById('signOutBtn');
 
-// ============================================
-// AUTH SCREEN LOGIC
-// ============================================
-document.getElementById('toggleAuthLink').addEventListener('click', () => {
+$("toggleAuthLink").addEventListener("click", toggleAuth);
+
+function toggleAuth() {
   isLoginMode = !isLoginMode;
-  document.getElementById('authTitle').textContent = isLoginMode ? 'Welcome back' : 'Create your account';
-  document.getElementById('authSub').textContent = isLoginMode ? 'Log in to pick up where you left off.' : 'Takes less than a minute.';
-  document.getElementById('authSubmitBtn').textContent = isLoginMode ? 'Log in' : 'Sign up';
-  document.getElementById('toggleAuthText').innerHTML = isLoginMode
-    ? 'New here? <a id="toggleAuthLink2">Create an account</a>'
-    : 'Already have an account? <a id="toggleAuthLink2">Log in</a>';
-  document.getElementById('toggleAuthLink2').addEventListener('click', () => document.getElementById('toggleAuthLink').click());
-});
 
-document.getElementById('authSubmitBtn').addEventListener('click', async () => {
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const errEl = document.getElementById('authError');
-  errEl.style.display = 'none';
+  $("authTitle").textContent = isLoginMode
+    ? "Welcome back"
+    : "Create your account";
+
+  $("authSub").textContent = isLoginMode
+    ? "Log in to continue building your future."
+    : "Start learning skills for real life.";
+
+  $("authSubmitBtn").textContent = isLoginMode
+    ? "Log in"
+    : "Sign up";
+
+  $("toggleAuthText").innerHTML = isLoginMode
+    ? 'New here? <a id="toggleAuthLink">Create an account</a>'
+    : 'Already have an account? <a id="toggleAuthLink">Log in</a>';
+
+  $("toggleAuthLink").addEventListener("click", toggleAuth);
+}
+
+$("authSubmitBtn").addEventListener("click", async () => {
+  clearError("authError");
+
+  const email = $("authEmail").value.trim();
+  const password = $("authPassword").value;
 
   if (!email || !password) {
-    errEl.textContent = 'Please fill in both fields.';
-    errEl.style.display = 'block';
+    showError("authError", "Please enter your email and password.");
     return;
   }
 
-  let result;
-  if (isLoginMode) {
-    result = await supabaseClient.auth.signInWithPassword({ email, password });
-  } else {
-    result = await supabaseClient.auth.signUp({ email, password });
-  }
+  const result = isLoginMode
+    ? await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      })
+    : await supabaseClient.auth.signUp({
+        email,
+        password
+      });
 
   if (result.error) {
-    errEl.textContent = result.error.message;
-    errEl.style.display = 'block';
+    showError("authError", result.error.message);
     return;
   }
 
-  if (!isLoginMode && result.data.user && !result.data.session) {
-    errEl.style.color = 'var(--lime)';
-    errEl.textContent = 'Check your email to confirm your account, then log in.';
-    errEl.style.display = 'block';
+  if (
+    !isLoginMode &&
+    result.data.user &&
+    !result.data.session
+  ) {
+    showError(
+      "authError",
+      "Check your email to confirm your account, then log in.",
+      true
+    );
     return;
   }
 
@@ -64,282 +93,775 @@ document.getElementById('authSubmitBtn').addEventListener('click', async () => {
   await afterLogin();
 });
 
-signOutBtn.addEventListener('click', async () => {
+$("signOutBtn").addEventListener("click", async () => {
   await supabaseClient.auth.signOut();
   location.reload();
 });
 
 // ============================================
-// ONBOARDING SCREEN LOGIC
+// ONBOARDING
 // ============================================
-function setupPillGroup(groupId, key) {
-  const group = document.getElementById(groupId);
-  group.querySelectorAll('.pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      group.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      obSelections[key] = pill.dataset.val;
-    });
-  });
-}
-setupPillGroup('ob_sex', 'sex');
-setupPillGroup('ob_activity', 'activity');
-setupPillGroup('ob_goal', 'goal');
-setupPillGroup('ob_location', 'location');
 
-document.getElementById('ob_age').addEventListener('input', (e) => {
-  const age = parseInt(e.target.value);
-  document.getElementById('youthNote').style.display = (age && age < 18) ? 'block' : 'none';
+function setupPills(groupId, key) {
+  $(groupId)
+    .querySelectorAll(".pill")
+    .forEach((pill) => {
+      pill.addEventListener("click", () => {
+        $(groupId)
+          .querySelectorAll(".pill")
+          .forEach((item) =>
+            item.classList.remove("active")
+          );
+
+        pill.classList.add("active");
+        obSelections[key] = pill.dataset.val;
+      });
+    });
+}
+
+setupPills("ob_sex", "sex");
+setupPills("ob_activity", "activity");
+setupPills("ob_goal", "goal");
+setupPills("ob_location", "location");
+
+$("ob_age").addEventListener("input", (event) => {
+  const age = Number(event.target.value);
+
+  $("youthNote").style.display =
+    age && age < 18 ? "block" : "none";
 });
 
-document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-  const errEl = document.getElementById('onboardError');
-  const age = parseInt(document.getElementById('ob_age').value);
-  const height = parseFloat(document.getElementById('ob_height').value);
-  const weight = parseFloat(document.getElementById('ob_weight').value);
+$("saveProfileBtn").addEventListener("click", async () => {
+  clearError("onboardError");
 
-  if (!age || !height || !weight || !obSelections.sex || !obSelections.activity || !obSelections.goal || !obSelections.location) {
-    errEl.textContent = 'Please fill in every field so we can personalize your plan.';
-    errEl.style.display = 'block';
+  const displayName = $("ob_name").value.trim();
+  const age = Number($("ob_age").value);
+  const height = Number($("ob_height").value);
+  const weight = Number($("ob_weight").value);
+
+  if (
+    !displayName ||
+    age < 13 ||
+    !height ||
+    !weight ||
+    Object.values(obSelections).some(
+      (value) => !value
+    )
+  ) {
+    showError(
+      "onboardError",
+      "Please complete every field. Rise is designed for users aged 13 and over."
+    );
     return;
   }
 
-  const { data, error } = await supabaseClient.from('profiles').upsert({
+  const profileData = {
     id: currentUser.id,
     email: currentUser.email,
-    age, height_cm: height, weight_kg: weight,
+    display_name: displayName,
+    age,
+    height_cm: height,
+    weight_kg: weight,
     sex: obSelections.sex,
     activity_level: obSelections.activity,
     goal: obSelections.goal,
-    training_location: obSelections.location
-  }).select().single();
+    training_location: obSelections.location,
+    is_adult: age >= 18,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .upsert(profileData)
+    .select()
+    .single();
 
   if (error) {
-    errEl.textContent = error.message;
-    errEl.style.display = 'block';
+    showError("onboardError", error.message);
     return;
   }
 
   currentProfile = data;
-  showDashboard();
+  showApp();
 });
 
 // ============================================
-// AFTER LOGIN — decide which screen to show
+// LOGIN CHECK
 // ============================================
-async function afterLogin() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  currentUser = user;
-  signOutBtn.classList.remove('hidden');
-  document.getElementById('themeBtn').classList.remove('hidden');
 
-  const { data: profile } = await supabaseClient
-    .from('profiles')
-    .select('*')
-    .eq('id', currentUser.id)
+async function afterLogin() {
+  const {
+    data: { user }
+  } = await supabaseClient.auth.getUser();
+
+  currentUser = user;
+
+  $("signOutBtn").classList.remove("hidden");
+
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
     .maybeSingle();
 
-  if (profile) {
-    currentProfile = profile;
-    showDashboard();
+  $("authScreen").classList.add("hidden");
+
+  if (error) {
+    console.error(error);
+  }
+
+  if (data) {
+    currentProfile = data;
+    showApp();
   } else {
-    authScreen.classList.add('hidden');
-    onboardScreen.classList.remove('hidden');
+    $("onboardScreen").classList.remove("hidden");
   }
 }
 
 // ============================================
-// PERSONALIZATION ENGINE
+// APP NAVIGATION
 // ============================================
-function calcTDEE(profile) {
-  const { age, height_cm, weight_kg, sex, activity_level } = profile;
-  let bmr;
-  if (sex === 'male') {
-    bmr = 10 * weight_kg + 6.25 * height_cm - 5 * age + 5;
-  } else {
-    bmr = 10 * weight_kg + 6.25 * height_cm - 5 * age - 161;
-  }
-  const multipliers = { low: 1.3, moderate: 1.55, high: 1.8 };
-  return Math.round(bmr * (multipliers[activity_level] || 1.4));
+
+function showApp() {
+  $("authScreen").classList.add("hidden");
+  $("onboardScreen").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+
+  renderHome();
+  renderProfile();
 }
+
+document
+  .querySelectorAll("[data-view]")
+  .forEach((button) => {
+    button.addEventListener("click", () => {
+      openView(button.dataset.view);
+    });
+  });
+
+document
+  .querySelectorAll("[data-open-view]")
+  .forEach((button) => {
+    button.addEventListener("click", () => {
+      openView(button.dataset.openView);
+    });
+  });
+
+function openView(viewId) {
+  document
+    .querySelectorAll(".view")
+    .forEach((view) =>
+      view.classList.add("hidden")
+    );
+
+  $(viewId).classList.remove("hidden");
+
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach((button) => {
+      button.classList.toggle(
+        "active",
+        button.dataset.view === viewId
+      );
+    });
+}
+
+function getDisplayName() {
+  return (
+    currentProfile?.display_name ||
+    currentUser?.email?.split("@")[0] ||
+    "there"
+  );
+}
+
+// ============================================
+// FITNESS
+// ============================================
 
 function getWorkoutPlan(profile) {
-  const { goal, training_location } = profile;
   const plans = {
     build_muscle: {
-      home: ['Push-ups 4x10', 'Bodyweight squats 4x15', 'Pike push-ups 3x8', 'Plank 3x40s'],
-      gym: ['Bench press 4x8', 'Squats 4x8', 'Rows 4x10', 'Overhead press 3x10'],
+      home: [
+        "Push-ups: 3 sets at a comfortable level",
+        "Bodyweight squats: 3 sets of 10–15",
+        "Backpack rows: 3 sets of 10",
+        "Finish with 5 minutes of mobility"
+      ],
+      gym: [
+        "Goblet squat: 3 sets of 8–12",
+        "Machine or dumbbell press: 3 sets of 8–12",
+        "Cable or machine row: 3 sets of 8–12",
+        "Finish with gentle mobility"
+      ]
     },
-    lose_fat: {
-      home: ['20 min brisk walk/jog', 'Bodyweight circuit x3 rounds', 'Mountain climbers 3x30s', 'Plank 3x40s'],
-      gym: ['20 min incline treadmill', 'Full-body circuit 3 rounds', 'Rowing machine 10 min'],
-    },
-    general_fitness: {
-      home: ['Jumping jacks 3x30s', 'Push-ups 3x10', 'Squats 3x15', 'Stretch 5 min'],
-      gym: ['Light cardio 15 min', 'Full-body machine circuit', 'Stretch 5 min'],
-    },
+
     sport_performance: {
-      home: ['Sprint intervals 6x20s', 'Lateral bounds 3x10', 'Core circuit', 'Mobility drills'],
-      gym: ['Sprint intervals', 'Box jumps 3x8', 'Core circuit', 'Mobility drills'],
+      home: [
+        "Dynamic warm-up: 5 minutes",
+        "Short acceleration runs with full rest",
+        "Lateral movement practice",
+        "Core stability and mobility"
+      ],
+      gym: [
+        "Dynamic warm-up",
+        "Controlled lower-body strength work",
+        "Upper-body pull and push exercises",
+        "Mobility and recovery"
+      ]
     },
+
     move_more: {
-      home: ['10 min walk', 'Light stretching', 'Bodyweight squats 2x10'],
-      gym: ['15 min easy cardio', 'Light stretching'],
+      home: [
+        "Take a 10–20 minute walk",
+        "Complete 5 minutes of gentle stretching",
+        "Break up long periods of sitting"
+      ],
+      gym: [
+        "Easy cardio at a conversational pace",
+        "Try two beginner resistance machines",
+        "Cool down gently"
+      ]
+    },
+
+    general_fitness: {
+      home: [
+        "Brisk walk or easy movement: 15 minutes",
+        "Squats: 3 sets of 10",
+        "Incline or knee push-ups: 3 sets of 8",
+        "Stretch gently"
+      ],
+      gym: [
+        "Easy cardio: 10 minutes",
+        "Beginner full-body machine circuit",
+        "Cool down and stretch"
+      ]
+    },
+
+    lose_fat: {
+      home: [
+        "Brisk walk: 20 minutes",
+        "Beginner full-body circuit",
+        "Drink water and eat balanced meals",
+        "Prioritise sleep and consistency"
+      ],
+      gym: [
+        "Moderate cardio at a conversational pace",
+        "Beginner full-body resistance circuit",
+        "Cool down",
+        "Focus on sustainable habits"
+      ]
     }
   };
-  const goalPlan = plans[goal] || plans.general_fitness;
-  const loc = training_location === 'both' ? 'gym' : training_location;
-  return goalPlan[loc] || goalPlan.home;
+
+  const selectedPlan =
+    plans[profile.goal] ||
+    plans.general_fitness;
+
+  const selectedLocation =
+    profile.training_location === "both"
+      ? "home"
+      : profile.training_location;
+
+  return (
+    selectedPlan[selectedLocation] ||
+    selectedPlan.home
+  );
 }
 
-function getNutritionTasks(profile) {
-  return [
-    'Eat a protein source with every meal',
-    'Have at least 2 servings of vegetables/fruit today',
-    'Drink water regularly through the day',
-    profile.is_adult ? 'Log your meals to track your deficit/surplus' : 'Notice how your energy feels after meals'
+// ============================================
+// NUTRITION
+// ============================================
+
+function getNutritionHabits(profile) {
+  const habits = [
+    "Include a protein food in a meal",
+    "Add fruit or vegetables where practical",
+    "Drink water regularly",
+    "Eat slowly enough to notice fullness"
   ];
+
+  if (!profile.is_adult) {
+    habits.push(
+      "Choose enough food to support growth, school and activity"
+    );
+  } else {
+    habits.push(
+      "Use sustainable portions rather than extreme restriction"
+    );
+  }
+
+  return habits;
 }
 
-const HYGIENE_TIPS = [
-  'Shampoo 2-3x a week if your hair tends dry, daily if it gets oily fast — over-washing can actually dry out your scalp.',
-  'Brush for a full 2 minutes, morning and night — most people stop at 45 seconds without realizing it.',
-  'Apply deodorant to clean, dry skin — putting it on damp skin makes it less effective.',
-  'Change pillowcases weekly — they build up oil and bacteria that can contribute to breakouts.',
-  'Rinse after sweating when you can — bacteria causing body odor multiply fast on damp skin.',
-  'Floss before bed, not just before a dentist visit — it prevents the buildup that causes most gum issues.'
-];
-
-const GUIDES = [
-  { title:'How often should I actually work out?', body:'2-3 sessions a week is a great starting point if you\'re new — it builds fitness while giving your body time to recover. You can build up to 4-5 as you get stronger. More isn\'t always better; consistency beats intensity early on.' },
-  { title:'Cardio vs weights — do I need both?', body:'Yes, ideally. Weights build strength and shape your body over time; cardio supports heart health and endurance. For fat loss specifically, diet matters more than exercise type — you can\'t out-train a bad diet, but combining both works best.' },
-  { title:'Sore vs injured — what\'s the difference?', body:'Normal soreness (DOMS) shows up 24-48 hours after a new or harder workout, feels dull, and improves with light movement. Injury pain is usually sharp, sudden, one-sided, or affects a joint — and gets worse with movement. When in doubt, rest and check with a doctor.' },
-  { title:'How much water should I drink daily?', body:'A common guide is roughly 30-35ml per kg of body weight, more if you\'re active or it\'s hot. Simplest check: if your urine is pale yellow, you\'re doing fine.' },
-  { title:'How often should I shampoo and condition?', body:'Oily hair: every day or every other day. Normal hair: every 2-3 days. Dry, curly, or coily hair: 1-2 times a week, since it needs natural oils to stay healthy. Condition every wash to prevent breakage, focusing on the ends, not the scalp.' },
-  { title:'Is it normal to not see results right away?', body:'Yes — most people see fitness improvements (energy, strength) in 2-3 weeks, but visible physical change usually takes 6-8 weeks of consistency. Progress photos or how your clothes fit are more reliable than the scale day to day.' },
-];
-
 // ============================================
-// RENDER DASHBOARD
+// HOME SCREEN
 // ============================================
-async function showDashboard() {
-  authScreen.classList.add('hidden');
-  onboardScreen.classList.add('hidden');
-  dashScreen.classList.remove('hidden');
 
-  const p = currentProfile;
-  document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', month:'long', day:'numeric' });
+function renderHome() {
+  $("homeName").textContent = getDisplayName();
 
-  const tdee = calcTDEE(p);
-  document.getElementById('statTDEE').textContent = tdee + ' kcal/day';
-  document.getElementById('statGoal').textContent = p.goal.replaceAll('_',' ');
-  document.getElementById('statLocation').textContent = p.training_location;
+  $("dashDate").textContent =
+    new Date().toLocaleDateString("en-AU", {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
 
-  const workout = getWorkoutPlan(p);
-  document.getElementById('workoutDesc').textContent = `Based on your ${p.goal.replaceAll('_',' ')} goal, ${p.training_location} training`;
-  const wEl = document.getElementById('workoutTasks');
-  wEl.innerHTML = '';
-  workout.forEach((item, i) => wEl.appendChild(makeTaskItem(item, `w_${i}`)));
+  $("workoutTasks").innerHTML = "";
 
-  const nutrition = getNutritionTasks(p);
-  document.getElementById('nutritionDesc').textContent = p.is_adult ? 'Personalized to your calorie target' : 'Building good habits, no numbers needed';
-  const nEl = document.getElementById('nutritionTasks');
-  nEl.innerHTML = '';
-  nutrition.forEach((item, i) => nEl.appendChild(makeTaskItem(item, `n_${i}`)));
-
-  const dayIndex = new Date().getDate() % HYGIENE_TIPS.length;
-  document.getElementById('hygieneTip').textContent = HYGIENE_TIPS[dayIndex];
-
-  const gEl = document.getElementById('guideList');
-  gEl.innerHTML = '';
-  GUIDES.forEach(g => {
-    const item = document.createElement('div');
-    item.className = 'guide-item';
-    item.innerHTML = `<h4>${g.title}</h4><p>${g.body}</p>`;
-    item.addEventListener('click', () => item.classList.toggle('open'));
-    gEl.appendChild(item);
-  });
-
-  await loadStreak();
-}
-
-function makeTaskItem(text, id) {
-  const row = document.createElement('div');
-  row.className = 'task-item';
-  row.innerHTML = `<button class="check-btn" id="check_${id}">✓</button><div class="task-text">${text}</div>`;
-  row.querySelector('button').addEventListener('click', async (e) => {
-    e.target.classList.toggle('done');
-    if (e.target.classList.contains('done')) {
-      await logCompletion(id.startsWith('w_') ? 'workout' : 'nutrition');
+  getWorkoutPlan(currentProfile).forEach(
+    (task, index) => {
+      $("workoutTasks").append(
+        makeTask(task, "workout", index)
+      );
     }
-  });
+  );
+
+  $("nutritionTasks").innerHTML = "";
+
+  getNutritionHabits(currentProfile).forEach(
+    (task, index) => {
+      $("nutritionTasks").append(
+        makeTask(task, "nutrition", index)
+      );
+    }
+  );
+
+  loadStreak();
+}
+
+function makeTask(text, type, index) {
+  const row = document.createElement("div");
+
+  row.className = "task";
+
+  row.innerHTML = `
+    <button class="check">✓</button>
+    <span>${escapeHtml(text)}</span>
+  `;
+
+  row
+    .querySelector("button")
+    .addEventListener("click", async (event) => {
+      if (
+        event.target.classList.contains("done")
+      ) {
+        return;
+      }
+
+      event.target.classList.add("done");
+      await logCompletion(type);
+    });
+
   return row;
 }
 
 async function logCompletion(type) {
-  if (type === 'workout') {
-    await supabaseClient.from('workout_logs').insert({ user_id: currentUser.id, workout_name: 'Daily task' });
-  } else {
-    await supabaseClient.from('meal_logs').insert({ user_id: currentUser.id, meal_description: 'Daily task', was_balanced: true });
-  }
+  const table =
+    type === "workout"
+      ? "workout_logs"
+      : "meal_logs";
+
+  const information =
+    type === "workout"
+      ? {
+          user_id: currentUser.id,
+          workout_name: "Daily Rise task"
+        }
+      : {
+          user_id: currentUser.id,
+          meal_description: "Daily Rise habit",
+          was_balanced: true
+        };
+
+  await supabaseClient
+    .from(table)
+    .insert(information);
+
   loadStreak();
 }
 
 async function loadStreak() {
   const { data } = await supabaseClient
-    .from('workout_logs')
-    .select('completed_at')
-    .eq('user_id', currentUser.id)
-    .order('completed_at', { ascending: false });
+    .from("workout_logs")
+    .select("completed_at")
+    .eq("user_id", currentUser.id)
+    .order("completed_at", {
+      ascending: false
+    });
 
   if (!data || data.length === 0) {
-    document.getElementById('streakCount').textContent = '0';
+    $("streakCount").textContent = "0";
     return;
   }
 
-  const days = new Set(data.map(d => new Date(d.completed_at).toDateString()));
+  const completedDays = new Set(
+    data.map((item) =>
+      new Date(
+        item.completed_at
+      ).toDateString()
+    )
+  );
+
   let streak = 0;
-  let cursor = new Date();
-  while (days.has(cursor.toDateString())) {
+  const currentDate = new Date();
+
+  while (
+    completedDays.has(
+      currentDate.toDateString()
+    )
+  ) {
     streak++;
-    cursor.setDate(cursor.getDate() - 1);
+    currentDate.setDate(
+      currentDate.getDate() - 1
+    );
   }
-  document.getElementById('streakCount').textContent = streak;
+
+  $("streakCount").textContent =
+    String(streak);
 }
 
 // ============================================
-// THEME PICKER
+// AI COACH
 // ============================================
-function applyTheme(theme) {
-  if (theme === 'cream') {
-    document.body.removeAttribute('data-theme');
-  } else {
-    document.body.setAttribute('data-theme', theme);
-  }
-  localStorage.setItem('rise_theme', theme);
-  document.querySelectorAll('.swatch').forEach(s => {
-    s.classList.toggle('selected', s.dataset.theme === theme);
+
+document
+  .querySelectorAll(".quick")
+  .forEach((button) => {
+    button.addEventListener("click", () => {
+      $("coachInput").value =
+        button.textContent;
+
+      $("coachInput").focus();
+    });
   });
+
+$("sendCoachBtn").addEventListener(
+  "click",
+  sendCoachMessage
+);
+
+$("coachInput").addEventListener(
+  "keydown",
+  (event) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      sendCoachMessage();
+    }
+  }
+);
+
+async function sendCoachMessage() {
+  const message =
+    $("coachInput").value.trim();
+
+  if (!message) {
+    return;
+  }
+
+  addMessage(message, "user");
+
+  $("coachInput").value = "";
+  $("typing").classList.remove("hidden");
+  $("sendCoachBtn").disabled = true;
+
+  try {
+    const {
+      data: { session }
+    } =
+      await supabaseClient.auth.getSession();
+
+    const response = await fetch(
+      "/api/coach",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+          Authorization:
+            `Bearer ${
+              session?.access_token || ""
+            }`
+        },
+        body: JSON.stringify({
+          message,
+          profile: {
+            age: currentProfile.age,
+            is_adult:
+              currentProfile.is_adult,
+            goal: currentProfile.goal,
+            interests:
+              currentProfile.interests,
+            display_name:
+              getDisplayName()
+          }
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.error ||
+          "The coach could not respond."
+      );
+    }
+
+    addMessage(result.reply, "ai");
+  } catch (error) {
+    addMessage(
+      `I couldn't connect to the AI coach yet. ${error.message}`,
+      "ai"
+    );
+  } finally {
+    $("typing").classList.add("hidden");
+    $("sendCoachBtn").disabled = false;
+  }
 }
 
-document.getElementById('themeBtn').addEventListener('click', () => {
-  document.getElementById('themePanel').classList.remove('hidden');
-});
-document.getElementById('closeThemeBtn').addEventListener('click', () => {
-  document.getElementById('themePanel').classList.add('hidden');
-});
-document.querySelectorAll('.swatch').forEach(swatch => {
-  swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme));
-});
+function addMessage(text, sender) {
+  const message = document.createElement(
+    "div"
+  );
 
-const savedTheme = localStorage.getItem('rise_theme') || 'cream';
-applyTheme(savedTheme);
+  message.className = `msg ${sender}`;
+  message.textContent = text;
+
+  $("messages").append(message);
+
+  $("messages").scrollTop =
+    $("messages").scrollHeight;
+}
 
 // ============================================
-// INIT — check if already logged in
+// PROFILE
 // ============================================
+
+function renderProfile() {
+  $("profileDisplayName").textContent =
+    getDisplayName();
+
+  $("profileUsername").textContent =
+    currentProfile.username
+      ? `@${currentProfile.username}`
+      : "Add a username";
+
+  $("editDisplayName").value =
+    currentProfile.display_name || "";
+
+  $("editUsername").value =
+    currentProfile.username || "";
+
+  $("editBio").value =
+    currentProfile.bio || "";
+
+  $("editInterests").value =
+    currentProfile.interests || "";
+
+  $("profileGoal").textContent =
+    (
+      currentProfile.goal || "—"
+    ).replaceAll("_", " ");
+
+  $("profileTraining").textContent =
+    currentProfile.training_location ||
+    "—";
+
+  $("profileAgeGroup").textContent =
+    currentProfile.is_adult
+      ? "18+"
+      : "13–17";
+
+  if (currentProfile.avatar_url) {
+    $("avatarImage").src =
+      currentProfile.avatar_url;
+
+    $("avatarImage").classList.remove(
+      "hidden"
+    );
+
+    $("avatarPlaceholder").classList.add(
+      "hidden"
+    );
+  }
+}
+
+$("savePublicProfileBtn").addEventListener(
+  "click",
+  async () => {
+    const username = $("editUsername")
+      .value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "");
+
+    const updates = {
+      display_name:
+        $("editDisplayName").value.trim(),
+      username: username || null,
+      bio: $("editBio").value.trim(),
+      interests:
+        $("editInterests").value.trim(),
+      updated_at:
+        new Date().toISOString()
+    };
+
+    if (!updates.display_name) {
+      $("profileStatus").textContent =
+        "Please enter a display name.";
+      return;
+    }
+
+    const { data, error } =
+      await supabaseClient
+        .from("profiles")
+        .update(updates)
+        .eq("id", currentUser.id)
+        .select()
+        .single();
+
+    if (error) {
+      $("profileStatus").textContent =
+        error.message;
+      return;
+    }
+
+    currentProfile = data;
+
+    $("profileStatus").textContent =
+      "Profile saved.";
+
+    renderProfile();
+    renderHome();
+  }
+);
+
+$("uploadAvatarBtn").addEventListener(
+  "click",
+  async () => {
+    const file =
+      $("avatarFile").files[0];
+
+    if (!file) {
+      $("profileStatus").textContent =
+        "Choose a picture first.";
+      return;
+    }
+
+    if (
+      file.size >
+      3 * 1024 * 1024
+    ) {
+      $("profileStatus").textContent =
+        "Please choose an image smaller than 3 MB.";
+      return;
+    }
+
+    const validTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
+
+    if (!validTypes.includes(file.type)) {
+      $("profileStatus").textContent =
+        "Use a JPG, PNG or WebP image.";
+      return;
+    }
+
+    $("profileStatus").textContent =
+      "Uploading…";
+
+    const extension = file.name
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+    const filePath =
+      `${currentUser.id}/avatar.${extension}`;
+
+    const { error } =
+      await supabaseClient.storage
+        .from("Avatar")
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type
+        });
+
+    if (error) {
+      $("profileStatus").textContent =
+        error.message;
+      return;
+    }
+
+    const { data } =
+      supabaseClient.storage
+        .from("Avatar")
+        .getPublicUrl(filePath);
+
+    const imageUrl =
+      `${data.publicUrl}?v=${Date.now()}`;
+
+    const savedProfile =
+      await supabaseClient
+        .from("profiles")
+        .update({
+          avatar_url: imageUrl,
+          updated_at:
+            new Date().toISOString()
+        })
+        .eq("id", currentUser.id)
+        .select()
+        .single();
+
+    if (savedProfile.error) {
+      $("profileStatus").textContent =
+        savedProfile.error.message;
+      return;
+    }
+
+    currentProfile =
+      savedProfile.data;
+
+    $("profileStatus").textContent =
+      "Profile picture updated.";
+
+    renderProfile();
+  }
+);
+
+// ============================================
+// SECURITY
+// ============================================
+
+function escapeHtml(value) {
+  return String(value).replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[character]
+  );
+}
+
+// ============================================
+// START APP
+// ============================================
+
 (async function init() {
-  const { data: { session } } = await supabaseClient.auth.getSession();
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
   if (session) {
     currentUser = session.user;
     await afterLogin();
