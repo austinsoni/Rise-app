@@ -3,353 +3,1123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rise — Your daily fitness & nutrition coach</title>
+
+<title>Rise — Your AI Life-Skills Mentor</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-  :root{
-    --bg:#F7F4EE;
-    --bg-2:#FFFFFF;
-    --card:#FFFFFF;
-    --line:#E7E1D5;
-    --ink:#242019;
-    --ink-dim:#7C7669;
-    --deep:#1D3A34;
-    --deep-2:#274A42;
-    --gold:#A9824C;
-    --gold-soft:#F1E6D3;
-    --shadow:0 1px 2px rgba(36,32,25,0.04), 0 8px 24px rgba(36,32,25,0.06);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{
-    background:var(--bg);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    min-height:100vh;
-  }
-  h1,h2,h3,.brand{font-family:'Fraunces',serif; font-weight:500;}
-  .hidden{display:none !important;}
+:root {
+  --bg: #f7f4ee;
+  --surface: #ffffff;
+  --surface-2: #f1ede4;
+  --line: #e7e1d5;
+  --ink: #242019;
+  --muted: #756f63;
+  --deep: #173e37;
+  --deep-2: #23584e;
+  --gold: #b2874e;
+  --gold-soft: #f2e6d3;
+  --danger: #b5533f;
+  --shadow: 0 10px 30px rgba(36, 32, 25, 0.08);
+}
 
-  .topbar{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:22px 28px;
-    border-bottom:1px solid var(--line);
-    background:var(--bg-2);
-  }
-  .brand{font-size:22px; letter-spacing:-0.01em; color:var(--deep);}
-  .brand span{color:var(--gold);}
-  #signOutBtn{
-    background:none; border:1px solid var(--line); color:var(--ink-dim);
-    padding:9px 16px; border-radius:24px; font-size:13px; cursor:pointer;
-    font-family:'Inter',sans-serif;
-  }
-  #signOutBtn:hover{border-color:var(--deep); color:var(--deep);}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  .auth-wrap{
-    min-height:calc(100vh - 77px);
-    display:flex; align-items:center; justify-content:center;
-    padding:24px;
-  }
-  .auth-card{
-    width:100%; max-width:400px;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:40px 36px;
-    box-shadow:var(--shadow);
-  }
-  .auth-card h1{font-size:30px; margin-bottom:8px; color:var(--deep);}
-  .auth-card p.sub{color:var(--ink-dim); font-size:14px; margin-bottom:30px; line-height:1.5;}
-  label{display:block; font-size:12px; color:var(--ink-dim); margin-bottom:7px; margin-top:18px; text-transform:uppercase; letter-spacing:0.05em;}
-  input, select{
-    width:100%; padding:13px 15px;
-    background:var(--bg); border:1px solid var(--line);
-    border-radius:10px; color:var(--ink); font-size:15px;
-    font-family:'Inter',sans-serif;
-  }
-  input:focus, select:focus{outline:none; border-color:var(--deep);}
-  .btn-primary{
-    width:100%; margin-top:26px;
-    background:var(--deep); color:#fff;
-    border:none; padding:15px; border-radius:10px;
-    font-size:15px; font-weight:500; cursor:pointer;
-    font-family:'Fraunces',serif;
-    letter-spacing:0.01em;
-  }
-  .btn-primary:hover{background:var(--deep-2);}
-  .toggle-auth{
-    text-align:center; margin-top:20px; font-size:13px; color:var(--ink-dim);
-  }
-  .toggle-auth a{color:var(--deep); cursor:pointer; text-decoration:none; font-weight:500;}
-  .error-msg{color:#B5533F; font-size:13px; margin-top:14px; display:none; line-height:1.4;}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Inter, sans-serif;
+  min-height: 100vh;
+}
 
-  .onboard-wrap{
-    max-width:540px; margin:0 auto; padding:56px 24px;
-  }
-  .onboard-wrap h1{font-size:32px; margin-bottom:10px; color:var(--deep);}
-  .onboard-wrap p.sub{color:var(--ink-dim); margin-bottom:36px; line-height:1.5;}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  .pill-group{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
-  .pill{
-    padding:11px 18px; border-radius:24px; border:1px solid var(--line);
-    background:var(--bg-2); color:var(--ink-dim); font-size:13px; cursor:pointer;
-  }
-  .pill.active{background:var(--deep); color:#fff; border-color:var(--deep); font-weight:500;}
+h1,
+h2,
+h3,
+.brand {
+  font-family: Fraunces, serif;
+}
 
-  .youth-note{
-    font-size:13px; color:var(--ink-dim); background:var(--gold-soft);
-    border:1px solid #E3D2AE; border-radius:12px; padding:14px 16px; margin-top:22px; line-height:1.5;
+.hidden {
+  display: none !important;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.topbar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.brand {
+  font-size: 25px;
+  color: var(--deep);
+}
+
+.brand span {
+  color: var(--gold);
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.outline-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 9px 14px;
+}
+
+.app-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 20px 100px;
+}
+
+.auth-wrap {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-card,
+.panel,
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.auth-card {
+  width: min(420px, 100%);
+  padding: 38px;
+}
+
+.auth-card h1 {
+  font-size: 32px;
+  color: var(--deep);
+  margin-bottom: 8px;
+}
+
+.sub {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 18px 0 7px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.primary-btn {
+  border: 0;
+  border-radius: 12px;
+  background: var(--deep);
+  color: white;
+  padding: 14px 18px;
+  font-weight: 700;
+}
+
+.primary-btn:hover {
+  background: var(--deep-2);
+}
+
+.full {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.error {
+  display: none;
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 13px;
+  line-height: 1.5;
+}
+
+.toggle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+.toggle a {
+  color: var(--deep);
+  font-weight: 700;
+}
+
+.onboard {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+}
+
+.onboard h1 {
+  font-size: 34px;
+  color: var(--deep);
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+
+.pill {
+  padding: 10px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.pill.active {
+  background: var(--deep);
+  border-color: var(--deep);
+  color: #ffffff;
+}
+
+.notice {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 13px;
+  background: var(--gold-soft);
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.nav-btn {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px 15px;
+  border-radius: 999px;
+  white-space: nowrap;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.nav-btn.active {
+  background: var(--deep);
+  color: #ffffff;
+  border-color: var(--deep);
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-end;
+  margin: 12px 0 26px;
+}
+
+.hero h1 {
+  font-size: 38px;
+  color: var(--deep);
+}
+
+.hero p {
+  color: var(--muted);
+  margin-top: 7px;
+}
+
+.streak {
+  background: linear-gradient(135deg, var(--deep), var(--deep-2));
+  color: #ffffff;
+  border-radius: 18px;
+  padding: 18px 22px;
+  min-width: 190px;
+}
+
+.streak strong {
+  font: 600 32px Fraunces, serif;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.card {
+  padding: 22px;
+}
+
+.card h3 {
+  color: var(--deep);
+  font-size: 20px;
+  margin: 8px 0;
+}
+
+.card p {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 14px;
+}
+
+.emoji {
+  font-size: 26px;
+}
+
+.section-title {
+  margin: 30px 0 14px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.task {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.check {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: none;
+  color: transparent;
+}
+
+.check.done {
+  background: var(--deep);
+  border-color: var(--deep);
+  color: #ffffff;
+}
+
+.chat-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px;
+}
+
+.coach-side {
+  padding: 20px;
+}
+
+.coach-side h2 {
+  color: var(--deep);
+  margin-bottom: 8px;
+}
+
+.quick {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 11px;
+  margin-top: 9px;
+  color: var(--ink);
+}
+
+.chat-panel {
+  height: 650px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1;
+  overflow: auto;
+  padding: 22px;
+}
+
+.msg {
+  max-width: 82%;
+  padding: 13px 15px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.msg.user {
+  margin-left: auto;
+  background: var(--deep);
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.msg.ai {
+  background: var(--surface-2);
+  border-bottom-left-radius: 5px;
+}
+
+.composer {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.composer textarea {
+  min-height: 48px;
+  max-height: 130px;
+  background: var(--bg);
+}
+
+.composer button {
+  min-width: 92px;
+}
+
+.typing {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 22px 10px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 18px;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 4px solid var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.avatar-placeholder {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: auto;
+  background: var(--gold-soft);
+  font-size: 42px;
+}
+
+.profile-card h2 {
+  margin-top: 14px;
+  color: var(--deep);
+}
+
+.profile-card p {
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.status {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
+.stat-list {
+  margin-top: 18px;
+  text-align: left;
+}
+
+.stat-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+@media (max-width: 850px) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .dash{max-width:940px; margin:0 auto; padding:40px 24px 90px;}
-  .greeting{font-size:30px; margin-bottom:6px; color:var(--deep);}
-  .greeting .accent{color:var(--gold);}
-  .sub-line{color:var(--ink-dim); font-size:14px; margin-bottom:32px;}
-
-  .streak-bar{
-    display:flex; align-items:center; gap:18px;
-    background:linear-gradient(135deg, var(--deep), var(--deep-2));
-    border-radius:18px;
-    padding:22px 26px; margin-bottom:32px;
-    box-shadow:var(--shadow);
-  }
-  .streak-num{font-size:36px; font-weight:500; color:#fff; font-family:'Fraunces',serif;}
-  .streak-label-wrap{color:rgba(255,255,255,0.75);}
-  .streak-label-wrap .title{color:#fff; font-weight:600; font-size:14px; font-family:'Inter',sans-serif;}
-
-  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
-  @media(max-width:680px){.grid2{grid-template-columns:1fr;} .row2{grid-template-columns:1fr;}}
-
-  .card{
-    background:var(--card); border:1px solid var(--line); border-radius:18px;
-    padding:26px;
-    box-shadow:var(--shadow);
-  }
-  .card h3{font-size:17px; margin-bottom:5px; color:var(--deep); font-weight:500;}
-  .card p.desc{color:var(--ink-dim); font-size:13px; margin-bottom:18px; line-height:1.4;}
-  .stat-row{display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--line); font-size:14px;}
-  .stat-row:last-child{border-bottom:none;}
-  .stat-row .val{color:var(--deep); font-weight:600;}
-
-  .task-item{
-    display:flex; align-items:center; gap:13px;
-    padding:13px 0; border-bottom:1px solid var(--line);
-  }
-  .task-item:last-child{border-bottom:none;}
-  .check-btn{
-    width:26px; height:26px; border-radius:50%; border:2px solid var(--line);
-    background:none; cursor:pointer; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; color:var(--deep); font-size:14px;
-  }
-  .check-btn.done{background:var(--deep); border-color:var(--deep); color:#fff;}
-  .task-text{font-size:14px; color:var(--ink);}
-
-  .section-title{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-dim); margin:36px 0 16px; font-weight:600;}
-
-  .guide-list{display:flex; flex-direction:column; gap:10px;}
-  .guide-item{
-    background:var(--card); border:1px solid var(--line); border-radius:14px;
-    padding:18px 20px; cursor:pointer;
-    box-shadow:var(--shadow);
-  }
-  .guide-item:hover{border-color:var(--gold);}
-  .guide-item h4{font-size:14px; margin-bottom:4px; color:var(--ink); font-weight:600; font-family:'Inter',sans-serif;}
-  .guide-item p{font-size:13px; color:var(--ink-dim); line-height:1.6; display:none;}
-  .guide-item.open p{display:block; margin-top:10px;}
-
-  /* ---------- Theme variants ---------- */
-  body[data-theme="midnight"]{
-    --bg:#12141C; --bg-2:#1B1E29; --card:#1B1E29; --line:#2E323F;
-    --ink:#EDEEF2; --ink-dim:#9A9EAD; --deep:#C6FF3D; --deep-2:#B0E62F;
-    --gold:#5EC8FF; --gold-soft:#20303A;
-    --shadow:0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
-  }
-  body[data-theme="midnight"] .btn-primary, body[data-theme="midnight"] .check-btn.done, body[data-theme="midnight"] .pill.active{color:#12130D;}
-
-  body[data-theme="sage"]{
-    --bg:#EAF0E9; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#D6E3D3;
-    --ink:#28362A; --ink-dim:#748572; --deep:#3E6B44; --deep-2:#4C7D51;
-    --gold:#9C8452; --gold-soft:#E4EAD9;
+  .chat-layout,
+  .profile-grid {
+    grid-template-columns: 1fr;
   }
 
-  body[data-theme="blush"]{
-    --bg:#F7ECEA; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#EED9D5;
-    --ink:#3A2A28; --ink-dim:#8C7573; --deep:#A85C52; --deep-2:#BD6E63;
-    --gold:#C79A6B; --gold-soft:#F0DFCF;
+  .coach-side {
+    order: 2;
   }
 
-  body[data-theme="ocean"]{
-    --bg:#EAF1F5; --bg-2:#FFFFFF; --card:#FFFFFF; --line:#D3E2EA;
-    --ink:#1F2E38; --ink-dim:#748C99; --deep:#1E5A78; --deep-2:#286E8F;
-    --gold:#5B9AAE; --gold-soft:#DCEBF0;
+  .chat-panel {
+    height: 600px;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid2,
+  .cards {
+    grid-template-columns: 1fr;
   }
 
-  .theme-toggle-btn{
-    background:none; border:1px solid var(--line); color:var(--ink-dim);
-    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px;
+  .hero {
+    align-items: flex-start;
+    flex-direction: column;
   }
-  .theme-panel{
-    position:fixed; inset:0; background:rgba(0,0,0,0.35);
-    display:flex; align-items:center; justify-content:center; z-index:50;
+
+  .hero h1 {
+    font-size: 32px;
   }
-  .theme-panel-inner{
-    background:var(--card); border-radius:18px; padding:26px; width:280px;
-    box-shadow:var(--shadow);
+
+  .streak {
+    width: 100%;
   }
-  .theme-swatches{display:flex; flex-direction:column; gap:8px;}
-  .swatch{
-    display:flex; align-items:center; gap:10px;
-    padding:10px 12px; border-radius:10px; border:1px solid var(--line);
-    cursor:pointer; font-size:14px; color:var(--ink); font-family:'Inter',sans-serif;
+
+  .topbar {
+    padding: 0 14px;
   }
-  .swatch span{width:18px; height:18px; border-radius:50%; border:1px solid rgba(0,0,0,0.15); display:inline-block;}
-  .swatch.selected{border-color:var(--deep); border-width:2px;}
+
+  .app-shell {
+    padding-inline: 14px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+}
 </style>
 </head>
+
 <body>
 
-<div class="topbar">
+<header class="topbar">
   <div class="brand">rise<span>.</span></div>
-  <div style="display:flex; align-items:center; gap:10px;">
-    <button id="themeBtn" class="theme-toggle-btn hidden" title="Customize background">🎨</button>
-    <button id="signOutBtn" class="hidden">Sign out</button>
-  </div>
-</div>
 
-<div id="themePanel" class="theme-panel hidden">
-  <div class="theme-panel-inner">
-    <h3 style="font-size:16px; margin-bottom:14px;">Background</h3>
-    <div class="theme-swatches">
-      <button class="swatch" data-theme="cream" style="background:#F7F4EE;"><span></span>Cream</button>
-      <button class="swatch" data-theme="midnight" style="background:#12141C;"><span style="background:#fff;"></span>Midnight</button>
-      <button class="swatch" data-theme="sage" style="background:#EAF0E9;"><span></span>Sage</button>
-      <button class="swatch" data-theme="blush" style="background:#F7ECEA;"><span></span>Blush</button>
-      <button class="swatch" data-theme="ocean" style="background:#EAF1F5;"><span></span>Ocean</button>
-    </div>
-    <button id="closeThemeBtn" style="margin-top:16px; width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:none; color:var(--ink-dim); cursor:pointer;">Close</button>
+  <div class="top-actions">
+    <button id="signOutBtn" class="outline-btn hidden">
+      Sign out
+    </button>
   </div>
-</div>
+</header>
 
-<div id="authScreen" class="auth-wrap">
+<section id="authScreen" class="auth-wrap">
   <div class="auth-card">
     <h1 id="authTitle">Welcome back</h1>
-    <p class="sub" id="authSub">Log in to pick up where you left off.</p>
 
-    <label>Email</label>
-    <input type="email" id="authEmail" placeholder="you@example.com">
-    <label>Password</label>
-    <input type="password" id="authPassword" placeholder="At least 6 characters">
+    <p class="sub" id="authSub">
+      Log in to continue building your future.
+    </p>
 
-    <button class="btn-primary" id="authSubmitBtn">Log in</button>
-    <p class="error-msg" id="authError"></p>
+    <label class="field-label">Email</label>
 
-    <p class="toggle-auth" id="toggleAuthText">
-      New here? <a id="toggleAuthLink">Create an account</a>
+    <input
+      id="authEmail"
+      type="email"
+      placeholder="you@example.com"
+    >
+
+    <label class="field-label">Password</label>
+
+    <input
+      id="authPassword"
+      type="password"
+      placeholder="At least 6 characters"
+    >
+
+    <button id="authSubmitBtn" class="primary-btn full">
+      Log in
+    </button>
+
+    <p id="authError" class="error"></p>
+
+    <p id="toggleAuthText" class="toggle">
+      New here?
+      <a id="toggleAuthLink">Create an account</a>
     </p>
   </div>
-</div>
+</section>
 
-<div id="onboardScreen" class="onboard-wrap hidden">
-  <h1>Let's set you up</h1>
-  <p class="sub">A few quick details so your plan actually fits you.</p>
+<section id="onboardScreen" class="onboard hidden">
+  <h1>Let’s personalise Rise</h1>
 
-  <label>Age</label>
-  <input type="number" id="ob_age" placeholder="e.g. 16">
+  <p class="sub">
+    These details help us provide safer, age-appropriate guidance.
+  </p>
 
-  <div class="row2">
-    <div>
-      <label>Height (cm)</label>
-      <input type="number" id="ob_height" placeholder="e.g. 170">
-    </div>
-    <div>
-      <label>Weight (kg)</label>
-      <input type="number" id="ob_weight" placeholder="e.g. 60">
-    </div>
-  </div>
+  <label class="field-label">Display name</label>
 
-  <label>Sex</label>
-  <div class="pill-group" id="ob_sex">
-    <div class="pill" data-val="female">Female</div>
-    <div class="pill" data-val="male">Male</div>
-    <div class="pill" data-val="other">Other</div>
-  </div>
+  <input
+    id="ob_name"
+    placeholder="What should Rise call you?"
+  >
 
-  <label>Activity level</label>
-  <div class="pill-group" id="ob_activity">
-    <div class="pill" data-val="low">Low</div>
-    <div class="pill" data-val="moderate">Moderate</div>
-    <div class="pill" data-val="high">High</div>
-  </div>
+  <label class="field-label">Age</label>
 
-  <label>Main goal</label>
-  <div class="pill-group" id="ob_goal">
-    <div class="pill" data-val="general_fitness">General fitness</div>
-    <div class="pill" data-val="build_muscle">Build muscle</div>
-    <div class="pill" data-val="lose_fat">Lose fat</div>
-    <div class="pill" data-val="sport_performance">Sport performance</div>
-    <div class="pill" data-val="move_more">Just move more</div>
-  </div>
-
-  <label>Where do you train?</label>
-  <div class="pill-group" id="ob_location">
-    <div class="pill" data-val="home">Home</div>
-    <div class="pill" data-val="gym">Gym</div>
-    <div class="pill" data-val="both">Both</div>
-  </div>
-
-  <p class="youth-note" id="youthNote">Heads up: for under-18s, we focus on habits, strength and movement rather than calorie or weight-loss numbers — that's the healthiest approach while you're still growing.</p>
-
-  <button class="btn-primary" id="saveProfileBtn">Build my plan</button>
-  <p class="error-msg" id="onboardError"></p>
-</div>
-
-<div id="dashScreen" class="dash hidden">
-  <h1 class="greeting">Today's <span class="accent">focus</span></h1>
-  <p class="sub-line" id="dashDate"></p>
-
-  <div class="streak-bar">
-    <div class="streak-num" id="streakCount">0</div>
-    <div class="streak-label-wrap">
-      <div class="title">day streak</div>
-      <div>Show up today to keep it going</div>
-    </div>
-  </div>
+  <input
+    id="ob_age"
+    type="number"
+    min="13"
+    max="100"
+    placeholder="e.g. 16"
+  >
 
   <div class="grid2">
-    <div class="card">
-      <h3>Today's workout</h3>
-      <p class="desc" id="workoutDesc">Loading your plan...</p>
-      <div id="workoutTasks"></div>
+    <div>
+      <label class="field-label">Height (cm)</label>
+
+      <input
+        id="ob_height"
+        type="number"
+        placeholder="e.g. 170"
+      >
     </div>
 
-    <div class="card">
-      <h3>Nutrition focus</h3>
-      <p class="desc" id="nutritionDesc">Loading your plan...</p>
-      <div id="nutritionTasks"></div>
-    </div>
-  </div>
+    <div>
+      <label class="field-label">Weight (kg)</label>
 
-  <div class="grid2" style="margin-top:22px;">
-    <div class="card">
-      <h3>Your numbers</h3>
-      <p class="desc">Calculated from your profile</p>
-      <div class="stat-row"><span>Daily energy needs</span><span class="val" id="statTDEE">--</span></div>
-      <div class="stat-row"><span>Goal</span><span class="val" id="statGoal">--</span></div>
-      <div class="stat-row"><span>Training base</span><span class="val" id="statLocation">--</span></div>
-    </div>
-
-    <div class="card">
-      <h3>Hygiene tip of the day</h3>
-      <p class="desc" id="hygieneTip">Loading...</p>
+      <input
+        id="ob_weight"
+        type="number"
+        placeholder="e.g. 60"
+      >
     </div>
   </div>
 
-  <div class="section-title">Guides</div>
-  <div class="guide-list" id="guideList"></div>
-</div>
+  <label class="field-label">Sex</label>
+
+  <div id="ob_sex" class="pill-row">
+    <button class="pill" data-val="female">
+      Female
+    </button>
+
+    <button class="pill" data-val="male">
+      Male
+    </button>
+
+    <button class="pill" data-val="other">
+      Other / prefer not to say
+    </button>
+  </div>
+
+  <label class="field-label">Activity level</label>
+
+  <div id="ob_activity" class="pill-row">
+    <button class="pill" data-val="low">
+      Low
+    </button>
+
+    <button class="pill" data-val="moderate">
+      Moderate
+    </button>
+
+    <button class="pill" data-val="high">
+      High
+    </button>
+  </div>
+
+  <label class="field-label">Main fitness goal</label>
+
+  <div id="ob_goal" class="pill-row">
+    <button class="pill" data-val="general_fitness">
+      General fitness
+    </button>
+
+    <button class="pill" data-val="build_muscle">
+      Build muscle
+    </button>
+
+    <button class="pill" data-val="lose_fat">
+      Healthy weight habits
+    </button>
+
+    <button class="pill" data-val="sport_performance">
+      Sport performance
+    </button>
+
+    <button class="pill" data-val="move_more">
+      Move more
+    </button>
+  </div>
+
+  <label class="field-label">Training location</label>
+
+  <div id="ob_location" class="pill-row">
+    <button class="pill" data-val="home">
+      Home
+    </button>
+
+    <button class="pill" data-val="gym">
+      Gym
+    </button>
+
+    <button class="pill" data-val="both">
+      Both
+    </button>
+  </div>
+
+  <p id="youthNote" class="notice">
+    For users under 18, Rise prioritises healthy growth,
+    strength, balanced meals and learning. It does not give
+    aggressive calorie deficits or rapid weight-loss plans.
+  </p>
+
+  <button id="saveProfileBtn" class="primary-btn full">
+    Create my Rise profile
+  </button>
+
+  <p id="onboardError" class="error"></p>
+</section>
+
+<main id="appScreen" class="app-shell hidden">
+
+  <nav class="nav-tabs">
+    <button class="nav-btn active" data-view="homeView">
+      Home
+    </button>
+
+    <button class="nav-btn" data-view="coachView">
+      AI Coach
+    </button>
+
+    <button class="nav-btn" data-view="profileView">
+      Profile
+    </button>
+  </nav>
+
+  <section id="homeView" class="view">
+
+    <div class="hero">
+      <div>
+        <h1>
+          Good day,
+          <span id="homeName">there</span>.
+        </h1>
+
+        <p id="dashDate"></p>
+      </div>
+
+      <div class="streak">
+        <strong id="streakCount">0</strong>
+        <div>day activity streak</div>
+      </div>
+    </div>
+
+    <div class="cards">
+
+      <article class="card">
+        <div class="emoji">🤖</div>
+
+        <h3>Rise AI Coach</h3>
+
+        <p>
+          Ask for guided help with schoolwork, resumes,
+          routines, budgeting, fitness, nutrition and everyday
+          life skills.
+        </p>
+
+        <button
+          class="primary-btn"
+          style="margin-top: 15px"
+          data-open-view="coachView"
+        >
+          Ask Rise
+        </button>
+      </article>
+
+      <article class="card">
+        <div class="emoji">📚</div>
+
+        <h3>Study Coach</h3>
+
+        <p>
+          Learn through hints, questions and explanations
+          instead of receiving copied homework answers.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">📄</div>
+
+        <h3>Resume Builder</h3>
+
+        <p>
+          Rise interviews you, improves your wording and creates
+          a strong resume while explaining each section.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🥗</div>
+
+        <h3>Nutrition</h3>
+
+        <p>
+          Balanced eating, easy high-protein recipes,
+          affordable grocery ideas, meal planning and age-safe
+          guidance.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">💪</div>
+
+        <h3>Fitness</h3>
+
+        <p>
+          Beginner-friendly home and gym plans, exercise
+          education, recovery and safe progress.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">💰</div>
+
+        <h3>Money</h3>
+
+        <p>
+          Build budgets, savings goals and confidence with
+          banking, payslips, scams and everyday money.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🧼</div>
+
+        <h3>Hygiene</h3>
+
+        <p>
+          Simple morning, dental, skincare, haircare, laundry
+          and room-cleaning routines.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🍳</div>
+
+        <h3>Life Skills</h3>
+
+        <p>
+          Cooking, appointments, professional emails, time
+          management, first-job preparation and independence.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="emoji">🧠</div>
+
+        <h3>Confidence</h3>
+
+        <p>
+          Goal setting, communication practice, boundaries,
+          stress-management skills and knowing when to seek
+          help.
+        </p>
+      </article>
+
+    </div>
+
+    <h2 class="section-title">
+      Today’s fitness tasks
+    </h2>
+
+    <div
+      class="panel"
+      style="padding: 20px"
+      id="workoutTasks"
+    ></div>
+
+    <h2 class="section-title">
+      Today’s nutrition habits
+    </h2>
+
+    <div
+      class="panel"
+      style="padding: 20px"
+      id="nutritionTasks"
+    ></div>
+
+  </section>
+
+  <section id="coachView" class="view hidden">
+
+    <div class="chat-layout">
+
+      <aside class="panel coach-side">
+        <h2>Ask Rise</h2>
+
+        <p class="sub">
+          Rise teaches and guides. It won’t simply do assessed
+          homework for you.
+        </p>
+
+        <button class="quick">
+          Help me build a professional resume
+        </button>
+
+        <button class="quick">
+          Guide me through a homework question
+        </button>
+
+        <button class="quick">
+          Make an easy high-protein meal plan
+        </button>
+
+        <button class="quick">
+          Help me create a weekly budget
+        </button>
+
+        <button class="quick">
+          Create a beginner workout plan
+        </button>
+
+        <button class="quick">
+          Help me build a morning routine
+        </button>
+      </aside>
+
+      <section class="panel chat-panel">
+
+        <div id="messages" class="messages">
+          <div class="msg ai">
+            Hi! I’m your Rise mentor. Tell me what you want help
+            with, and we’ll work through it together.
+          </div>
+        </div>
+
+        <div id="typing" class="typing hidden">
+          Rise is thinking…
+        </div>
+
+        <div class="composer">
+          <textarea
+            id="coachInput"
+            placeholder="Ask for help with school, work, money, food, fitness or life skills…"
+          ></textarea>
+
+          <button id="sendCoachBtn" class="primary-btn">
+            Send
+          </button>
+        </div>
+
+      </section>
+
+    </div>
+
+  </section>
+
+  <section id="profileView" class="view hidden">
+
+    <div class="profile-grid">
+
+      <aside class="card profile-card">
+
+        <img
+          id="avatarImage"
+          class="avatar hidden"
+          alt="Profile picture"
+        >
+
+        <div
+          id="avatarPlaceholder"
+          class="avatar-placeholder"
+        >
+          👤
+        </div>
+
+        <h2 id="profileDisplayName">
+          Your profile
+        </h2>
+
+        <p id="profileUsername">
+          @username
+        </p>
+
+        <label class="field-label">
+          Change profile picture
+        </label>
+
+        <input
+          id="avatarFile"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+        >
+
+        <button
+          id="uploadAvatarBtn"
+          class="primary-btn full"
+        >
+          Upload picture
+        </button>
+
+        <div class="stat-list">
+
+          <div class="stat-line">
+            <span>Goal</span>
+            <strong id="profileGoal">—</strong>
+          </div>
+
+          <div class="stat-line">
+            <span>Training</span>
+            <strong id="profileTraining">—</strong>
+          </div>
+
+          <div class="stat-line">
+            <span>Age group</span>
+            <strong id="profileAgeGroup">—</strong>
+          </div>
+
+        </div>
+
+      </aside>
+
+      <section class="card">
+
+        <h2 style="color: var(--deep)">
+          Edit profile
+        </h2>
+
+        <p class="sub">
+          Share only what you’re comfortable with. Profiles are
+          private in this version.
+        </p>
+
+        <div class="grid2">
+
+          <div>
+            <label class="field-label">
+              Display name
+            </label>
+
+            <input id="editDisplayName">
+          </div>
+
+          <div>
+            <label class="field-label">
+              Username
+            </label>
+
+            <input
+              id="editUsername"
+              placeholder="e.g. futurebuilder"
+            >
+          </div>
+
+        </div>
+
+        <label class="field-label">
+          About me
+        </label>
+
+        <textarea
+          id="editBio"
+          maxlength="300"
+          placeholder="Tell Rise a little about your goals and interests…"
+        ></textarea>
+
+        <label class="field-label">
+          Interests
+        </label>
+
+        <input
+          id="editInterests"
+          placeholder="e.g. football, cooking, science"
+        >
+
+        <div class="form-actions">
+          <button
+            id="savePublicProfileBtn"
+            class="primary-btn"
+          >
+            Save profile
+          </button>
+        </div>
+
+        <p
+          id="profileStatus"
+          class="status"
+        ></p>
+
+      </section>
+
+    </div>
+
+  </section>
+
+</main>
 
 <script src="supabaseClient.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
