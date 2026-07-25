@@ -131,6 +131,7 @@ async function afterLogin() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   currentUser = user;
   signOutBtn.classList.remove('hidden');
+  document.getElementById('themeBtn').classList.remove('hidden');
 
   const { data: profile } = await supabaseClient
     .from('profiles')
@@ -151,7 +152,6 @@ async function afterLogin() {
 // PERSONALIZATION ENGINE
 // ============================================
 function calcTDEE(profile) {
-  // Mifflin-St Jeor BMR formula
   const { age, height_cm, weight_kg, sex, activity_level } = profile;
   let bmr;
   if (sex === 'male') {
@@ -230,31 +230,26 @@ async function showDashboard() {
   const p = currentProfile;
   document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', month:'long', day:'numeric' });
 
-  // Stats
   const tdee = calcTDEE(p);
   document.getElementById('statTDEE').textContent = tdee + ' kcal/day';
   document.getElementById('statGoal').textContent = p.goal.replaceAll('_',' ');
   document.getElementById('statLocation').textContent = p.training_location;
 
-  // Workout
   const workout = getWorkoutPlan(p);
   document.getElementById('workoutDesc').textContent = `Based on your ${p.goal.replaceAll('_',' ')} goal, ${p.training_location} training`;
   const wEl = document.getElementById('workoutTasks');
   wEl.innerHTML = '';
   workout.forEach((item, i) => wEl.appendChild(makeTaskItem(item, `w_${i}`)));
 
-  // Nutrition
   const nutrition = getNutritionTasks(p);
   document.getElementById('nutritionDesc').textContent = p.is_adult ? 'Personalized to your calorie target' : 'Building good habits, no numbers needed';
   const nEl = document.getElementById('nutritionTasks');
   nEl.innerHTML = '';
   nutrition.forEach((item, i) => nEl.appendChild(makeTaskItem(item, `n_${i}`)));
 
-  // Hygiene tip (rotates by day)
   const dayIndex = new Date().getDate() % HYGIENE_TIPS.length;
   document.getElementById('hygieneTip').textContent = HYGIENE_TIPS[dayIndex];
 
-  // Guides
   const gEl = document.getElementById('guideList');
   gEl.innerHTML = '';
   GUIDES.forEach(g => {
@@ -265,7 +260,6 @@ async function showDashboard() {
     gEl.appendChild(item);
   });
 
-  // Streak
   await loadStreak();
 }
 
@@ -303,7 +297,6 @@ async function loadStreak() {
     return;
   }
 
-  // Count consecutive days with at least one log
   const days = new Set(data.map(d => new Date(d.completed_at).toDateString()));
   let streak = 0;
   let cursor = new Date();
@@ -313,6 +306,34 @@ async function loadStreak() {
   }
   document.getElementById('streakCount').textContent = streak;
 }
+
+// ============================================
+// THEME PICKER
+// ============================================
+function applyTheme(theme) {
+  if (theme === 'cream') {
+    document.body.removeAttribute('data-theme');
+  } else {
+    document.body.setAttribute('data-theme', theme);
+  }
+  localStorage.setItem('rise_theme', theme);
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.theme === theme);
+  });
+}
+
+document.getElementById('themeBtn').addEventListener('click', () => {
+  document.getElementById('themePanel').classList.remove('hidden');
+});
+document.getElementById('closeThemeBtn').addEventListener('click', () => {
+  document.getElementById('themePanel').classList.add('hidden');
+});
+document.querySelectorAll('.swatch').forEach(swatch => {
+  swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme));
+});
+
+const savedTheme = localStorage.getItem('rise_theme') || 'cream';
+applyTheme(savedTheme);
 
 // ============================================
 // INIT — check if already logged in
