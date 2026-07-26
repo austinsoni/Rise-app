@@ -224,6 +224,10 @@
     transition:all 0.18s ease;
   }
   .check-btn.done{transform:scale(1.05);}
+  @keyframes pulse{
+    0%,100%{opacity:0.5;}
+    50%{opacity:1;}
+  }
 </style>
 </head>
 <body>
@@ -334,6 +338,12 @@
 
   <button class="btn-primary" id="saveProfileBtn">Build my plan</button>
   <p class="error-msg" id="onboardError"></p>
+</div>
+
+<div id="greetingScreen" class="hidden" style="min-height:calc(100vh - 77px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; cursor:pointer; text-align:center;">
+  <p id="greetingDate" style="color:var(--ink-dim); font-size:14px; margin-bottom:14px; letter-spacing:0.05em; text-transform:uppercase;"></p>
+  <h1 id="greetingBig" style="font-size:44px; color:var(--deep); margin-bottom:30px; max-width:600px; line-height:1.2;">Good morning, there</h1>
+  <p style="color:var(--ink-dim); font-size:13px; animation:pulse 2s ease-in-out infinite;">Tap anywhere to continue</p>
 </div>
 
 <div id="dashScreen" class="dash hidden">
