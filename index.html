@@ -186,7 +186,8 @@
 
   .theme-toggle-btn{
     background:none; border:1px solid var(--line); color:var(--ink-dim);
-    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px;
+    width:38px; height:38px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
   }
   .theme-panel{
     position:fixed; inset:0; background:rgba(0,0,0,0.35);
@@ -204,6 +205,25 @@
   }
   .swatch span{width:18px; height:18px; border-radius:50%; border:1px solid rgba(0,0,0,0.15); display:inline-block;}
   .swatch.selected{border-color:var(--deep); border-width:2px;}
+
+  .card-icon{
+    width:38px; height:38px; border-radius:10px;
+    background:var(--gold-soft); color:var(--deep);
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px;
+  }
+  @keyframes fadeInUp{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .fade-in{
+    opacity:0;
+    animation:fadeInUp 0.6s ease forwards;
+  }
+  .check-btn, .pill, .btn-primary, .theme-toggle-btn, .guide-item, .swatch{
+    transition:all 0.18s ease;
+  }
+  .check-btn.done{transform:scale(1.05);}
 </style>
 </head>
 <body>
@@ -212,7 +232,9 @@
   <div class="brand">rise<span>.</span></div>
   <div style="display:flex; align-items:center; gap:10px;">
     <img id="topbarAvatar" src="" class="hidden" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
-    <button id="themeBtn" class="theme-toggle-btn hidden" title="Customize background">🎨</button>
+    <button id="themeBtn" class="theme-toggle-btn hidden" title="Customize background">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-.5-1.5-1-2 0-2 1.5-2H16a5 5 0 0 0 5-5 8.98 8.98 0 0 0-9-9z"/></svg>
+    </button>
     <button id="signOutBtn" class="hidden">Sign out</button>
   </div>
 </div>
@@ -315,25 +337,31 @@
 </div>
 
 <div id="dashScreen" class="dash hidden">
-  <h1 class="greeting">Today's <span class="accent">focus</span></h1>
+  <h1 class="greeting" id="greetingText">Good morning</h1>
   <p class="sub-line" id="dashDate"></p>
 
-  <div class="streak-bar">
+  <div class="streak-bar fade-in">
     <div class="streak-num" id="streakCount">0</div>
     <div class="streak-label-wrap">
       <div class="title">day streak</div>
-      <div>Show up today to keep it going</div>
+      <div id="streakSubtext">Show up today to keep it going</div>
     </div>
   </div>
 
   <div class="grid2">
-    <div class="card">
-      <h3>Today's workout</h3>
+    <div class="card fade-in" style="animation-delay:0.05s;">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6.5 6.5 4 9l3 3-3 3 2.5 2.5L9 15l3 3 3-3 2.5 2.5L20 15l-3-3 3-3-2.5-2.5L15 9l-3-3-3 3z"/></svg>
+      </div>
+      <h3>Today's movement</h3>
       <p class="desc" id="workoutDesc">Loading your plan...</p>
       <div id="workoutTasks"></div>
     </div>
 
-    <div class="card">
+    <div class="card fade-in" style="animation-delay:0.12s;">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3c-2 3-3 5-3 7a3 3 0 0 0 6 0c0-2-1-4-3-7z"/><path d="M12 13v8M9 21h6"/></svg>
+      </div>
       <h3>Nutrition focus</h3>
       <p class="desc" id="nutritionDesc">Loading your plan...</p>
       <div id="nutritionTasks"></div>
@@ -341,7 +369,10 @@
   </div>
 
   <div class="grid2" style="margin-top:22px;">
-    <div class="card">
+    <div class="card fade-in" style="animation-delay:0.19s;">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5M4 5l6 4-6 4M20 19V5M20 5l-6 4 6 4"/></svg>
+      </div>
       <h3>Your numbers</h3>
       <p class="desc">Calculated from your profile</p>
       <div class="stat-row"><span>Daily energy needs</span><span class="val" id="statTDEE">--</span></div>
@@ -349,8 +380,11 @@
       <div class="stat-row"><span>Training base</span><span class="val" id="statLocation">--</span></div>
     </div>
 
-    <div class="card">
-      <h3>Hygiene tip of the day</h3>
+    <div class="card fade-in" style="animation-delay:0.26s;">
+      <div class="card-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+      </div>
+      <h3>Daily care</h3>
       <p class="desc" id="hygieneTip">Loading...</p>
     </div>
   </div>
