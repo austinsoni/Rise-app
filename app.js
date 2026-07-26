@@ -153,7 +153,7 @@ document.getElementById('saveProfileBtn').addEventListener('click', async () => 
   }
 
   currentProfile = data;
-  showDashboard();
+  showGreeting();
 });
 
 // ============================================
@@ -173,7 +173,7 @@ async function afterLogin() {
 
   if (profile) {
     currentProfile = profile;
-    showDashboard();
+    showGreeting();
   } else {
     authScreen.classList.add('hidden');
     onboardScreen.classList.remove('hidden');
@@ -250,6 +250,27 @@ const GUIDES = [
   { title:'How often should I shampoo and condition?', body:'Oily hair: every day or every other day. Normal hair: every 2-3 days. Dry, curly, or coily hair: 1-2 times a week, since it needs natural oils to stay healthy. Condition every wash to prevent breakage, focusing on the ends, not the scalp.' },
   { title:'Is it normal to not see results right away?', body:'Yes — most people see fitness improvements (energy, strength) in 2-3 weeks, but visible physical change usually takes 6-8 weeks of consistency. Progress photos or how your clothes fit are more reliable than the scale day to day.' },
 ];
+
+// ============================================
+// GREETING SCREEN
+// ============================================
+function showGreeting() {
+  authScreen.classList.add('hidden');
+  onboardScreen.classList.add('hidden');
+  dashScreen.classList.add('hidden');
+  document.getElementById('greetingScreen').classList.remove('hidden');
+
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const firstName = (currentProfile.display_name || 'there').split(' ')[0];
+  document.getElementById('greetingBig').textContent = `${timeGreeting}, ${firstName}`;
+  document.getElementById('greetingDate').textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', month:'long', day:'numeric' });
+}
+
+document.getElementById('greetingScreen').addEventListener('click', () => {
+  document.getElementById('greetingScreen').classList.add('hidden');
+  showDashboard();
+});
 
 // ============================================
 // RENDER DASHBOARD
