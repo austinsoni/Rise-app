@@ -260,6 +260,10 @@ async function showDashboard() {
   dashScreen.classList.remove('hidden');
 
   const p = currentProfile;
+  const hour = new Date().getHours();
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const firstName = (p.display_name || 'there').split(' ')[0];
+  document.getElementById('greetingText').textContent = `${timeGreeting}, ${firstName}`;
   document.getElementById('dashDate').textContent = new Date().toLocaleDateString('en-AU', { weekday:'long', month:'long', day:'numeric' });
 
   const tdee = calcTDEE(p);
@@ -344,6 +348,10 @@ async function loadStreak() {
     cursor.setDate(cursor.getDate() - 1);
   }
   document.getElementById('streakCount').textContent = streak;
+  const subEl = document.getElementById('streakSubtext');
+  if (subEl) {
+    subEl.textContent = streak === 0 ? 'Show up today to start your streak' : streak < 3 ? 'Keep going — momentum is building' : "You're building something real";
+  }
 }
 
 // ============================================
